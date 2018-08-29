@@ -1,3 +1,8 @@
+// github.com/canonical-ledgers/bitcointax v1.0.0
+// Copyright 2018 Canonical Ledgers, LLC. All rights reserved.
+// Use of this source code is governed by the MIT license that can be found in
+// the LICENSE file distributed with this source code.
+
 package bitcointax
 
 import (
@@ -63,11 +68,14 @@ func TestAddTransactions(t *testing.T) {
 	require.NotEmpty(key, "key")
 	require.NotEmpty(secret, "secret")
 	assert := assert.New(t)
+
 	err := c.AddTransactions(nil)
 	assert.Error(err, "AddTransactions(nil)")
+
 	txs := []Transaction{}
 	err = c.AddTransactions(txs)
 	assert.Error(err, "AddTransactions(nil)")
+
 	txs = []Transaction{{
 		Date:     Time(time.Now()),
 		Action:   IncomeTx,
