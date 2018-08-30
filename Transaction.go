@@ -19,7 +19,7 @@ type Transaction struct {
 	Currency    string  `json:"currency"`              // ISO 4217 currency symbol or "BTC", "LTC" or "XRP" [required]
 	Volume      float64 `json:"volume"`                // Number of units of symbol                         [required]
 	Exchange    string  `json:"exchange,omitempty"`    // Exchange or wallet name, e.g. "Coinbase"
-	Exchangeid  string  `json:"exchangeid,omitempty"`  // Exchange or wallet's unique transaction id
+	ExchangeID  string  `json:"exchangeid,omitempty"`  // Exchange or wallet's unique transaction id
 	Price       float64 `json:"price,omitempty"`       // Price of symbol in units of currency (if total is unknown)   default: total/volume or average daily rate
 	Total       float64 `json:"total,omitempty"`       // Total value of transaction in currency (if price is unknown) default: price * volume
 	Fee         float64 `json:"fee,omitempty"`         // Fee for transaction in units of currency                     default: 0
