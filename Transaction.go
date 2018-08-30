@@ -23,9 +23,9 @@ type Transaction struct {
 	Price       float64 `json:"price,omitempty"`       // Price of symbol in units of currency (if total is unknown)   default: total/volume or average daily rate
 	Total       float64 `json:"total,omitempty"`       // Total value of transaction in currency (if price is unknown) default: price * volume
 	Fee         float64 `json:"fee,omitempty"`         // Fee for transaction in units of currency                     default: 0
-	Feecurrency string  `json:"feecurrency,omitempty"` // Currency for transaction fee                                 default: currency
+	FeeCurrency string  `json:"feecurrency,omitempty"` // Currency for transaction fee                                 default: currency
 	Memo        string  `json:"memo,omitempty"`        // Note for transaction
-	Txhash      string  `json:"txhash,omitempty"`      // Hash value from symbol's blockchain
+	TxHash      string  `json:"txhash,omitempty"`      // Hash value from symbol's blockchain
 	Sender      string  `json:"sender,omitempty"`      // Coin address of sender
 	Recipient   string  `json:"recipient,omitempty"`   // Coin address of recipient
 	ID          string  `json:"id,omitempty"`          // Unique ID assigned internally by bitcoin.tax
