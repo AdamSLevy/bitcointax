@@ -28,14 +28,14 @@ func ExampleClient_AddTransactions() {
 	flag.Parse()
 	c := bitcointax.NewClient(*key, *secret)
 	txs := []bitcointax.Transaction{{
-		Date:     bitcointax.Time(time.Now()),
+		Date:     time.Now(),
 		Action:   bitcointax.IncomeTx,
 		Symbol:   "FCT",
 		Currency: "USD",
 		Volume:   5,
 		Total:    25,
 	}, {
-		Date:     bitcointax.Time(time.Now()),
+		Date:     time.Now(),
 		Action:   bitcointax.IncomeTx,
 		Symbol:   "FCT",
 		Currency: "USD",

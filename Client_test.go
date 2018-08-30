@@ -77,14 +77,14 @@ func TestAddTransactions(t *testing.T) {
 	assert.Error(err, "AddTransactions(nil)")
 
 	txs = []Transaction{{
-		Date:     Time(time.Now()),
+		Date:     time.Now(),
 		Action:   IncomeTx,
 		Symbol:   "FCT",
 		Currency: "USD",
 		Volume:   5,
 		Total:    25,
 	}, {
-		Date:     Time(time.Now()),
+		Date:     time.Now(),
 		Action:   IncomeTx,
 		Symbol:   "FCT",
 		Currency: "USD",
