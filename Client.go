@@ -1,4 +1,4 @@
-// github.com/canonical-ledgers/bitcointax v1.0.0
+// github.com/canonical-ledgers/bitcointax v1.0.1
 // Copyright 2018 Canonical Ledgers, LLC. All rights reserved.
 // Use of this source code is governed by the MIT license that can be found in
 // the LICENSE file distributed with this source code.
@@ -41,26 +41,28 @@ func NewClient(key, secret string) *Client {
 func (c Client) ListTransactions(taxyear time.Time,
 	start, limit uint64) ([]Transaction, uint64, error) {
 	values := make(url.Values)
-	values.Add("taxyear", fmt.Sprintf("%v", taxyear))
+	values.Add("taxyear", taxyear.Format("2006"))
 	values.Add("start", fmt.Sprintf("%v", start))
 	if limit != 0 {
 		values.Add("limit", fmt.Sprintf("%v", limit))
 	}
 
-	req, err := http.NewRequest("GET", c.URL+"?"+values.Encode(), nil)
+	url := c.URL + transactionsURI + "?" + values.Encode()
+	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		return nil, 0, err
+		return nil, 0, fmt.Errorf("http.NewRequest(%#v, %#v, nil): %v",
+			"GET", url, err)
 	}
 	c.setHeaders(req.Header)
 	resp, err := c.Do(req)
 	if err != nil {
-		return nil, 0, err
+		return nil, 0, fmt.Errorf("http.Client.Do(http.Request%+v): %v", req, err)
 	}
 
 	var response jsonResponse
 	d := json.NewDecoder(resp.Body)
 	if err := d.Decode(&response); err != nil {
-		return nil, 0, err
+		return nil, 0, fmt.Errorf("json.Decoder.Decode(): %v", err)
 	}
 	if response.Status != successStatus {
 		return nil, 0, fmt.Errorf("status: %#v, message: %#v",
@@ -77,23 +79,25 @@ func (c Client) AddTransactions(txs []Transaction) error {
 	}
 	jsonBytes, err := json.Marshal(txs)
 	if err != nil {
-		return err
+		return fmt.Errorf("json.Marshal(%+v): %v", txs, err)
 	}
 	buf := bytes.NewBuffer(jsonBytes)
-	req, err := http.NewRequest("POST", c.URL+transactionsURI, buf)
+	url := c.URL + transactionsURI
+	req, err := http.NewRequest("POST", url, buf)
 	if err != nil {
-		return err
+		return fmt.Errorf("http.NewRequest(%#v, %#v, buf): %v",
+			"POST", url, err)
 	}
 	c.setHeaders(req.Header)
 	resp, err := c.Do(req)
 	if err != nil {
-		return err
+		return fmt.Errorf("http.Client.Do(http.Request%+v): %v", req, err)
 	}
 
 	var response jsonResponse
 	d := json.NewDecoder(resp.Body)
 	if err := d.Decode(&response); err != nil {
-		return err
+		return fmt.Errorf("json.Decoder.Decode(): %v", err)
 	}
 	if response.Status != successStatus {
 		return fmt.Errorf("status: %#v, message: %#v",

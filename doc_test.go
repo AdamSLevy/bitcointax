@@ -9,10 +9,8 @@ import (
 )
 
 func ExampleClient_ListTransactions() {
-	key := flag.String("key", "", "bitcoin.tax key")
-	secret := flag.String("secret", "", "bitcoin.tax secret")
-	flag.Parse()
-	c := bitcointax.NewClient(*key, *secret)
+	key, secret = "API KEY", "API SECRET"
+	c := bitcointax.NewClient(key, secret)
 	txs, total, err := c.ListTransactions(time.Now(), 0, 50)
 	if err != nil {
 		fmt.Printf("error: %v\n", err)
@@ -23,10 +21,8 @@ func ExampleClient_ListTransactions() {
 }
 
 func ExampleClient_AddTransactions() {
-	key := flag.String("key", "", "bitcoin.tax key")
-	secret := flag.String("secret", "", "bitcoin.tax secret")
-	flag.Parse()
-	c := bitcointax.NewClient(*key, *secret)
+	key, secret = "API KEY", "API SECRET"
+	c := bitcointax.NewClient(key, secret)
 	txs := []bitcointax.Transaction{{
 		Date:     time.Now(),
 		Action:   bitcointax.IncomeTx,
