@@ -10,11 +10,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 	"time"
 )
 
-// Client provides methods for querying the bitcoin.tax REST API. You may set
-// any additional http.Client settings directly on this type.
+// Client stores API credentials and provides methods for querying the
+// bitcoin.tax REST API. You may set any additional http.Client settings
+// directly on this type.
 type Client struct {
 	URL    string
 	Key    string
@@ -38,13 +40,14 @@ func NewClient(key, secret string) *Client {
 // will be used.
 func (c Client) ListTransactions(taxyear time.Time,
 	start, limit uint64) ([]Transaction, uint64, error) {
-	url := c.URL + fmt.Sprintf("%v?taxyear=%v&start=%v",
-		transactionsURI, taxyear.Year(), start)
+	values := make(url.Values)
+	values.Add("taxyear", fmt.Sprintf("%v", taxyear))
+	values.Add("start", fmt.Sprintf("%v", start))
 	if limit != 0 {
-		url = url + fmt.Sprintf("&limit=%v", limit)
+		values.Add("limit", fmt.Sprintf("%v", limit))
 	}
 
-	req, err := http.NewRequest("GET", url, nil)
+	req, err := http.NewRequest("GET", c.URL+"?"+values.Encode(), nil)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -77,8 +80,7 @@ func (c Client) AddTransactions(txs []Transaction) error {
 		return err
 	}
 	buf := bytes.NewBuffer(jsonBytes)
-	url := c.URL + transactionsURI
-	req, err := http.NewRequest("POST", url, buf)
+	req, err := http.NewRequest("POST", c.URL+transactionsURI, buf)
 	if err != nil {
 		return err
 	}
