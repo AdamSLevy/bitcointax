@@ -1,7 +1,6 @@
 package bitcointax_test
 
 import (
-	"flag"
 	"fmt"
 	"time"
 
@@ -9,7 +8,7 @@ import (
 )
 
 func ExampleClient_ListTransactions() {
-	key, secret = "API KEY", "API SECRET"
+	key, secret := "API KEY", "API SECRET"
 	c := bitcointax.NewClient(key, secret)
 	txs, total, err := c.ListTransactions(time.Now(), 0, 50)
 	if err != nil {
@@ -21,7 +20,7 @@ func ExampleClient_ListTransactions() {
 }
 
 func ExampleClient_AddTransactions() {
-	key, secret = "API KEY", "API SECRET"
+	key, secret := "API KEY", "API SECRET"
 	c := bitcointax.NewClient(key, secret)
 	txs := []bitcointax.Transaction{{
 		Date:     time.Now(),
