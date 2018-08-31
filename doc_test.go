@@ -15,11 +15,11 @@ func ExampleClient_ListTransactions() {
 	c := bitcointax.NewClient(*key, *secret)
 	txs, total, err := c.ListTransactions(time.Now(), 0, 50)
 	if err != nil {
-		fmt.Printf("error: %v", err)
+		fmt.Printf("error: %v\n", err)
 		return
 	}
-	fmt.Printf("Total transactions %+v", total)
-	fmt.Printf("Transactions %+v", txs)
+	fmt.Printf("Total transactions %+v\n", total)
+	fmt.Printf("Transactions %+v\n", txs)
 }
 
 func ExampleClient_AddTransactions() {
@@ -43,7 +43,7 @@ func ExampleClient_AddTransactions() {
 		Total:    25,
 	}}
 	if err := c.AddTransactions(txs); err != nil {
-		fmt.Printf("error: %v", err)
+		fmt.Printf("error: %v\n", err)
 		return
 	}
 }
