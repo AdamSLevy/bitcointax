@@ -8,6 +8,7 @@ package bitcointax
 import (
 	"flag"
 	"fmt"
+	"math"
 	"testing"
 	"time"
 
@@ -26,23 +27,24 @@ func TestMain(m *testing.M) {
 	flag.StringVar(&secret, "secret", "", "bitcoin.tax secret")
 	flag.Parse()
 	c = NewClient(key, secret)
+	c.Timeout = 5 * time.Second
 	m.Run()
 }
 
 func TestListTransactions(t *testing.T) {
-	t.Parallel()
 	require.NotEmpty(t, key, "key")
 	require.NotEmpty(t, secret, "secret")
 
-	t.Run("start: 0 length: 0", func(t *testing.T) { testListTransactions(t, 0, 0) })
+	testListTransactions(t, 0, 0)
 	testListTransactions(t, 0, 50)
 	testListTransactions(t, 25, 125)
 	testListTransactions(t, 0, 2)
+	testListTransactions(t, 20, math.MaxUint64)
 }
 
 func testListTransactions(t *testing.T, start, length uint64) {
 	now := time.Now()
-	msg := fmt.Sprintf("ListTransactions(%v, %v, %v)", now.UTC(), start, length)
+	msg := fmt.Sprintf("ListTransactions(%v, %v, %v)", now.Year(), start, length)
 	t.Run(msg, func(t *testing.T) {
 		t.Parallel()
 		txs, total, err := c.ListTransactions(now, start, length)
@@ -50,8 +52,9 @@ func testListTransactions(t *testing.T, start, length uint64) {
 			length = 100
 		}
 		require.NoError(t, err)
-		assert.True(t, len(txs) == int(min(total-min(start, total), length)),
-			"len(txs) == min(total-min(start, total), length)")
+		assert.Lenf(t, txs, int(min(total-min(start, total), length)),
+			"len(txs) == min(total(%v)-min(start(%v), total), length(%v))",
+			total, start, length)
 	})
 }
 
@@ -63,7 +66,6 @@ func min(l, r uint64) uint64 {
 }
 
 func TestAddTransactions(t *testing.T) {
-	t.Parallel()
 	require := require.New(t)
 	require.NotEmpty(key, "key")
 	require.NotEmpty(secret, "secret")
