@@ -9,6 +9,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"time"
@@ -47,26 +48,9 @@ func (c Client) ListTransactions(taxyear time.Time,
 		values.Add("limit", fmt.Sprintf("%v", limit))
 	}
 
-	url := c.URL + transactionsURI + "?" + values.Encode()
-	req, err := http.NewRequest("GET", url, nil)
+	response, err := c.doRequest(c.URL+transactionsURI+"?"+values.Encode(), nil)
 	if err != nil {
-		return nil, 0, fmt.Errorf("http.NewRequest(%#v, %#v, nil): %v",
-			"GET", url, err)
-	}
-	c.setHeaders(req.Header)
-	resp, err := c.Do(req)
-	if err != nil {
-		return nil, 0, fmt.Errorf("http.Client.Do(http.Request%+v): %v", req, err)
-	}
-
-	var response jsonResponse
-	d := json.NewDecoder(resp.Body)
-	if err := d.Decode(&response); err != nil {
-		return nil, 0, fmt.Errorf("json.Decoder.Decode(): %v", err)
-	}
-	if response.Status != successStatus {
-		return nil, 0, fmt.Errorf("status: %#v, message: %#v",
-			response.Status, response.Message)
+		return nil, 0, err
 	}
 	return response.Data.Transactions, response.Data.Total, nil
 }
@@ -82,29 +66,42 @@ func (c Client) AddTransactions(txs []Transaction) error {
 		return fmt.Errorf("json.Marshal(%+v): %v", txs, err)
 	}
 	buf := bytes.NewBuffer(jsonBytes)
-	url := c.URL + transactionsURI
-	req, err := http.NewRequest("POST", url, buf)
+
+	if _, err := c.doRequest(c.URL+transactionsURI, buf); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (c Client) doRequest(url string, body io.Reader) (*responseT, error) {
+	method := "POST"
+	if body == nil {
+		method = "GET"
+	}
+	req, err := http.NewRequest(method, url, body)
 	if err != nil {
-		return fmt.Errorf("http.NewRequest(%#v, %#v, buf): %v",
-			"POST", url, err)
+		return nil, fmt.Errorf("http.NewRequest(%#v, %#v, %+v): %v",
+			method, url, body, err)
 	}
 	c.setHeaders(req.Header)
 	resp, err := c.Do(req)
 	if err != nil {
-		return fmt.Errorf("http.Client.Do(http.Request%+v): %v", req, err)
+		return nil, fmt.Errorf("http.Client.Do(http.Request%+v): %v", req, err)
+	}
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf(resp.Status)
 	}
 
-	var response jsonResponse
+	response := &responseT{}
 	d := json.NewDecoder(resp.Body)
-	if err := d.Decode(&response); err != nil {
-		return fmt.Errorf("json.Decoder.Decode(): %v", err)
+	if err := d.Decode(response); err != nil {
+		return nil, fmt.Errorf("json.Decoder.Decode(): %v", err)
 	}
 	if response.Status != successStatus {
-		return fmt.Errorf("status: %#v, message: %#v",
-			response.Status, response.Message)
+		return nil, fmt.Errorf("status: %#v, message: %#v",
+			response.Status, response.Data.Message)
 	}
-	return nil
-
+	return response, nil
 }
 
 func (c Client) setHeaders(header http.Header) {
@@ -113,21 +110,21 @@ func (c Client) setHeaders(header http.Header) {
 	header.Set("Content-Type", "application/json")
 }
 
-type jsonResponse struct {
-	Status statusType `json:"status"` // "success", "fail" or "error"
-	Data   dataType   `json:"data"`
+type responseT struct {
+	Status statusT `json:"status"` // "success", "fail" or "error"
+	Data   dataT   `json:"data"`
 }
 
-type dataType struct {
+type dataT struct {
 	Total        uint64        `json:"total"` // total number of transactions
 	Transactions []Transaction `json:"transactions"`
 	Message      string        `json:"message,omitempty"`
 }
 
-type statusType string
+type statusT string
 
 const (
-	successStatus = statusType("success")
-	failStatus    = statusType("fail")
-	errorStatus   = statusType("error")
+	successStatus = statusT("success")
+	failStatus    = statusT("fail")
+	errorStatus   = statusT("error")
 )
