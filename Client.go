@@ -114,14 +114,14 @@ func (c Client) setHeaders(header http.Header) {
 }
 
 type jsonResponse struct {
-	Status  statusType `json:"status"` // "success", "fail" or "error"
-	Data    dataType   `json:"data"`
-	Message string     `json:"message,omitempty"`
+	Status statusType `json:"status"` // "success", "fail" or "error"
+	Data   dataType   `json:"data"`
 }
 
 type dataType struct {
 	Total        uint64        `json:"total"` // total number of transactions
 	Transactions []Transaction `json:"transactions"`
+	Message      string        `json:"message,omitempty"`
 }
 
 type statusType string
