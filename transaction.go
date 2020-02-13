@@ -32,23 +32,11 @@ type Transaction struct {
 	ID          string    `json:"id,omitempty"`          // Unique ID assigned internally by bitcoin.tax
 }
 
+type _Transaction Transaction
+
 type transaction struct {
-	Date        timeT   `json:"date"`
-	Action      TxType  `json:"action"`
-	Symbol      string  `json:"symbol"`
-	Currency    string  `json:"currency"`
-	Volume      float64 `json:"volume"`
-	Exchange    string  `json:"exchange,omitempty"`
-	ExchangeID  string  `json:"exchangeid,omitempty"`
-	Price       float64 `json:"price,omitempty"`
-	Total       float64 `json:"total,omitempty"`
-	Fee         float64 `json:"fee,omitempty"`
-	FeeCurrency string  `json:"feecurrency,omitempty"`
-	Memo        string  `json:"memo,omitempty"`
-	TxHash      string  `json:"txhash,omitempty"`
-	Sender      string  `json:"sender,omitempty"`
-	Recipient   string  `json:"recipient,omitempty"`
-	ID          string  `json:"id,omitempty"`
+	Date timeT `json:"date"`
+	_Transaction
 }
 
 // timeT is a wrapper around time.Time that implements the json.Marshaler
@@ -61,14 +49,14 @@ type TxType string
 
 // Valid TxTypes
 const (
-	SellTx       = TxType("SELL")     // Selling crypto-currency to fiat or BTC
-	BuyTx        = TxType("BUY")      // Buy crypto-currency for fiat or BTC
-	IncomeTx     = TxType("INCOME")   // General income
-	GiftIncomeTx = TxType("GIFTIN")   // Income received as a gift or tip
-	MiningTx     = TxType("MINING")   // Income received from mining
-	SpendTx      = TxType("SPEND")    // General spending of crypto-currencies
-	GiftTx       = TxType("GIFT")     // Spending as a gift or tip
-	DonationTx   = TxType("DONATION") // Spending to a registered charity
+	SellTx       TxType = "SELL"     // Selling crypto-currency to fiat or BTC
+	BuyTx               = "BUY"      // Buy crypto-currency for fiat or BTC
+	IncomeTx            = "INCOME"   // General income
+	GiftIncomeTx        = "GIFTIN"   // Income received as a gift or tip
+	MiningTx            = "MINING"   // Income received from mining
+	SpendTx             = "SPEND"    // General spending of crypto-currencies
+	GiftTx              = "GIFT"     // Spending as a gift or tip
+	DonationTx          = "DONATION" // Spending to a registered charity
 )
 
 // MarshalJSON implements the json.Marshaler interface such that it is
@@ -76,22 +64,8 @@ const (
 // field.
 func (t Transaction) MarshalJSON() ([]byte, error) {
 	return json.Marshal(transaction{
-		Date:        timeT(t.Date),
-		Action:      t.Action,
-		Symbol:      t.Symbol,
-		Currency:    t.Currency,
-		Volume:      t.Volume,
-		Exchange:    t.Exchange,
-		ExchangeID:  t.ExchangeID,
-		Price:       t.Price,
-		Total:       t.Total,
-		Fee:         t.Fee,
-		FeeCurrency: t.FeeCurrency,
-		Memo:        t.Memo,
-		TxHash:      t.TxHash,
-		Sender:      t.Sender,
-		Recipient:   t.Recipient,
-		ID:          t.ID,
+		Date:         (timeT)(t.Date),
+		_Transaction: _Transaction(t),
 	})
 }
 
