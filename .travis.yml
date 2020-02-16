@@ -1,13 +1,15 @@
 language: go
 go:
-- 1.10.x
-- 1.11
+- 1.13.x
+
 before_install:
 - sudo apt-get install moreutils
 - go get -u github.com/mattn/goveralls
+
 script:
 - go test -coverprofile=coverage.out -key $KEY -secret $SECRET | pee cat 'grep -q PASS'
 - goveralls -service=travis-ci -coverprofile=coverage.out
+
 git:
   depth: 1
 notifications:
@@ -16,5 +18,4 @@ notifications:
     secure: FhXJUwiOZqjlkLUTTcY3RoKrW4qQl/E/1UwJsth/YpRzr6faMSegMRgIqPQTiYGgzx/Y7+WUSs7LjgbLP6VU8Z48yHC8SZTzb54JcCwq/bs35Gj1XlQP6e9wi5ff8VM3inJya0+44Rnc1+JvASdiMWhJHDnPlh5s2NZf++ZUyDJmvdcKCd+HhYfwBX05k4L/R0nseQ1dkxBs+AV6BGY6kAY30vaXbcL/7BmH0MD6QvwISjp+iQaNbb2mfEWBGQ/yqT19WNMAPp2o/n2dBF5xowlY0OgY6s3UOHKmHO801GzWWdg2Tq5zOaUQfcyIhIS7n7T4uDqASVPhp3foX7wO4MqcQIgIaygtrYYD3DbIn1Io3RiVpRFklj9Z5yF/iSvk7vA2cffvMV6V8lnQmOCIJalsJBmjUdtdIRPr2qAuLsnGpMDUbq9IqZvS+7yFhZFNW9StysRj4+8HrVFvl0TDhR6U7GGYnONFPtmGQMHSCfsd0vWafWv6K9sKImUcMQTf4ZgVZvPRoAngExbcZ/J6/9+eKv76LqTSwb0gPY15D+ek+goRlMjrty6mDv6DKw/kq3/gGkbwFG/eEX6W6diRc2pdTcDAojEvxZExaxy6XB+PZHLlU6H4EVFrIXx43E5uQemT7Go3PTqTgNbpuQP1Ac1N3nv8NO5GHlJOVvR8X74=
 env:
   global:
-  - GO111MODULE=on
   - secure: fjmQvmcJ7VDkDBAK5ogfvsgvOmKjrnnpubJCpYUe6Wc9hLEgwc2M+vlVzekyMTXz46gRxBIihpti6WQMPFg3IBhdVmg41pMlO+QbykskXJ53QEQ2OkBok3GseLjPQazregot93rv6vpAVrFHIKjV6id525AE4GlmnK+a2Kl7ztFchpdnvI9Y7dlagxr6jbaN38xDoUj03SqbQsz2E0XIt0kuZQ6KcelkB4QaAjTwqYj9zlEyNxhBz44Q99N+ffqukGCzLth8OzJ1r476Z98u4vhI1hxhQ9WbyPlnkBTVPk2J2GSKevoPhn5Avy1DgM+8bkRat33M2UBCnv/29Kriy8BX1YBpzaKJATppqTBw+NkMifMFQDTonUdU/V47IV4OsdDz2bWiLRqLOoVeWYw8OiKTCqbi2tFUaSviGjpC+rZsjplakas8mmqp2wvLxjsSaUnbMZLMSLCfKtZuNj5Z3Xzb1m0YBRdcpkESbwoV0+PRC561NuBNr8jb2nGq0s32IoPBDG+wdFKk6wu4vBoHWThaHU1/BPvpeb4botfBh41yoCPmGErxhlaVlTxX6/N3mSkeOkxfTjWDFKHsJ6WW+mwqaG61LFe/GikMteIgxqWVSzRATroMhx2wLIGdDns/4kwo4i+MHLyaRmUhBlqXlLkyPiFfL7PVrltVS6iW4QU=
