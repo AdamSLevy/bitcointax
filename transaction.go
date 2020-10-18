@@ -7,8 +7,22 @@ package bitcointax
 
 import (
 	"encoding/json"
-	"fmt"
 	"time"
+)
+
+// TxType represents the valid types of transactions used by bitcoin.tax.
+type TxType string
+
+// Valid Transaction Types accepted by bitcoin.tax for "Action".
+const (
+	TxTypeSell       = "SELL"     // Selling crypto-currency to fiat or BTC
+	TxTypeBuy        = "BUY"      // Buy crypto-currency for fiat or BTC
+	TxTypeIncome     = "INCOME"   // General income
+	TxTypeGiftIncome = "GIFTIN"   // Income received as a gift or tip
+	TxTypeMining     = "MINING"   // Income received from mining
+	TxTypeSpend      = "SPEND"    // General spending of crypto-currencies
+	TxTypeGift       = "GIFT"     // Spending as a gift or tip
+	TxTypeDonation   = "DONATION" // Spending to a registered charity
 )
 
 // Transaction represents the transaction JSON object sent and received by the
@@ -33,44 +47,41 @@ type Transaction struct {
 }
 
 type _Transaction Transaction
-
-type transaction struct {
-	Date timeT `json:"date"`
-	_Transaction
+type __Transaction struct {
+	Date *_Time `json:"date"`
+	*_Transaction
 }
 
-// timeT is a wrapper around time.Time that implements the json.Marshaler
-// interface such that it is compatible with what the bitcoin.tax API expects
-// in the Transaction.Date field.
-type timeT time.Time
-
-// TxType represents the valid types of transactions used by bitcoin.tax.
-type TxType string
-
-// Valid TxTypes
-const (
-	SellTx       TxType = "SELL"     // Selling crypto-currency to fiat or BTC
-	BuyTx               = "BUY"      // Buy crypto-currency for fiat or BTC
-	IncomeTx            = "INCOME"   // General income
-	GiftIncomeTx        = "GIFTIN"   // Income received as a gift or tip
-	MiningTx            = "MINING"   // Income received from mining
-	SpendTx             = "SPEND"    // General spending of crypto-currencies
-	GiftTx              = "GIFT"     // Spending as a gift or tip
-	DonationTx          = "DONATION" // Spending to a registered charity
-)
-
-// MarshalJSON implements the json.Marshaler interface such that it is
-// compatible with what the bitcoin.tax API expects in the Transaction.Date
-// field.
 func (t Transaction) MarshalJSON() ([]byte, error) {
-	return json.Marshal(transaction{
-		Date:         (timeT)(t.Date),
-		_Transaction: _Transaction(t),
+	return json.Marshal(__Transaction{
+		Date:         (*_Time)(&t.Date),
+		_Transaction: (*_Transaction)(&t),
 	})
 }
 
-// MarshalJSON marshals t into a byte slice with a string representation of the
-// unix timestamp returned by time.Time(t).Unix().
-func (t timeT) MarshalJSON() ([]byte, error) {
-	return []byte(fmt.Sprintf("%v", time.Time(t).Unix())), nil
+func (t *Transaction) UnmarshalJSON(data []byte) error {
+	return json.Unmarshal(data, &__Transaction{
+		Date:         (*_Time)(&t.Date),
+		_Transaction: (*_Transaction)(t),
+	})
+}
+
+const timeFmtISO8601 = "2006-01-02T15:04:05-07:00"
+
+type _Time time.Time
+
+func (t *_Time) Time() *time.Time { return (*time.Time)(t) }
+
+func (t *_Time) UnmarshalJSON(data []byte) error {
+	var str string
+	if err := json.Unmarshal(data, &str); err != nil {
+		return err
+	}
+	var err error
+	*(*time.Time)(t), err = time.Parse(timeFmtISO8601, str)
+	return err
+}
+
+func (t _Time) MarshalJSON() ([]byte, error) {
+	return json.Marshal(t.Time().Format(timeFmtISO8601))
 }

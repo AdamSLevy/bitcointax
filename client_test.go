@@ -6,9 +6,11 @@
 package bitcointax
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"math"
+	"net/http"
 	"testing"
 	"time"
 
@@ -26,8 +28,7 @@ func TestMain(m *testing.M) {
 	flag.StringVar(&key, "key", "", "bitcoin.tax key")
 	flag.StringVar(&secret, "secret", "", "bitcoin.tax secret")
 	flag.Parse()
-	c = NewClient(key, secret)
-	c.Timeout = 5 * time.Second
+	c = NewClient(key, secret, WithHTTPClient(&http.Client{Timeout: 5 * time.Second}))
 	m.Run()
 }
 
@@ -42,12 +43,12 @@ func TestListTransactions(t *testing.T) {
 	testListTransactions(t, 20, math.MaxUint64)
 }
 
-func testListTransactions(t *testing.T, start, length uint64) {
+func testListTransactions(t *testing.T, start, length uint) {
 	now := time.Now()
 	msg := fmt.Sprintf("ListTransactions(%v, %v, %v)", now.Year(), start, length)
 	t.Run(msg, func(t *testing.T) {
 		t.Parallel()
-		txs, total, err := c.ListTransactions(now, start, length)
+		txs, total, err := c.ListTransactions(context.Background(), uint(now.Year()), start, length)
 		if length == 0 {
 			length = 100
 		}
@@ -58,7 +59,7 @@ func testListTransactions(t *testing.T, start, length uint64) {
 	})
 }
 
-func min(l, r uint64) uint64 {
+func min(l, r uint) uint {
 	if l < r {
 		return l
 	}
@@ -71,28 +72,28 @@ func TestAddTransactions(t *testing.T) {
 	require.NotEmpty(secret, "secret")
 	assert := assert.New(t)
 
-	err := c.AddTransactions(nil)
+	err := c.AddTransactions(context.Background())
 	assert.Error(err, "AddTransactions(nil)")
 
 	txs := []Transaction{}
-	err = c.AddTransactions(txs)
+	err = c.AddTransactions(context.Background(), txs...)
 	assert.Error(err, "AddTransactions(nil)")
 
 	txs = []Transaction{{
 		Date:     time.Now(),
-		Action:   IncomeTx,
+		Action:   TxTypeIncome,
 		Symbol:   "FCT",
 		Currency: "USD",
 		Volume:   5,
 		Total:    25,
 	}, {
 		Date:     time.Now(),
-		Action:   IncomeTx,
+		Action:   TxTypeIncome,
 		Symbol:   "FCT",
 		Currency: "USD",
 		Volume:   5,
 		Total:    25,
 	}}
-	err = c.AddTransactions(txs)
+	err = c.AddTransactions(context.Background(), txs...)
 	assert.NoError(err, "AddTransactions")
 }
